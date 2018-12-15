@@ -61,14 +61,18 @@ class Dogs extends Component {
 
       if (error || isLoading) return
 
-      if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
+      if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight - 2 && navigator.onLine) {
         loadDogs()
       }
     }
   }
 
   componentWillMount() {
-    this.loadDogs()
+    if (navigator.onLine) {
+      this.loadDogs()
+    } else {
+      this.setState({ photos: JSON.parse(localStorage.getItem('photos')) })
+    }
   }
 
   loadDogs = () => {
@@ -91,6 +95,7 @@ class Dogs extends Component {
             photos: [...this.state.photos, ...morePhotos],
             loadTime: this.state.loadTime + 1,
           })
+          localStorage.setItem('photos', JSON.stringify(this.state.photos))
         })
         .catch(err => {
           console.log(err)
