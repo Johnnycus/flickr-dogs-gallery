@@ -6,6 +6,7 @@ import InputBase from '@material-ui/core/InputBase'
 import { fade } from '@material-ui/core/styles/colorManipulator'
 import { withStyles } from '@material-ui/core/styles'
 import SearchIcon from '@material-ui/icons/Search'
+import { Link } from 'react-router-dom'
 
 const styles = theme => ({
   root: {
@@ -15,10 +16,7 @@ const styles = theme => ({
     flexGrow: 1,
   },
   title: {
-    display: 'none',
-    [theme.breakpoints.up('sm')]: {
-      display: 'block',
-    },
+    width: '60%',
   },
   search: {
     position: 'relative',
@@ -27,15 +25,11 @@ const styles = theme => ({
     '&:hover': {
       backgroundColor: fade(theme.palette.common.white, 0.25),
     },
-    marginLeft: 0,
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing.unit,
-      width: 'auto',
-    },
+    marginLeft: theme.spacing.unit,
+    width: 'auto',
   },
   searchIcon: {
-    width: theme.spacing.unit * 9,
+    marginLeft: 15,
     height: '100%',
     position: 'absolute',
     pointerEvents: 'none',
@@ -51,7 +45,7 @@ const styles = theme => ({
     paddingTop: theme.spacing.unit,
     paddingRight: theme.spacing.unit,
     paddingBottom: theme.spacing.unit,
-    paddingLeft: theme.spacing.unit * 10,
+    paddingLeft: 50,
     transition: theme.transitions.create('width'),
     width: '100%',
     [theme.breakpoints.up('sm')]: {
@@ -61,6 +55,10 @@ const styles = theme => ({
       },
     },
   },
+  logo: {
+    textDecoration: 'none',
+    color: 'white',
+  },
 })
 
 const Header = ({ classes }) => (
@@ -68,7 +66,9 @@ const Header = ({ classes }) => (
     <AppBar position="fixed">
       <Toolbar>
         <Typography className={classes.title} variant="h6" color="inherit" noWrap>
-          Dogs Gallery
+          <Link to="/" className={classes.logo}>
+            Dogs Gallery
+          </Link>
         </Typography>
         <div className={classes.grow} />
         <div className={classes.search}>

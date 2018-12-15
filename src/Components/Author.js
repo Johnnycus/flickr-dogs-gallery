@@ -31,7 +31,7 @@ const styles = {
   },
 }
 
-class Dogs extends Component {
+class Author extends Component {
   constructor(props) {
     super(props)
 
@@ -65,7 +65,9 @@ class Dogs extends Component {
   }
 
   loadDogs = () => {
-    const api = `https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=888315f85320878f33df15f17795be6e&tags=dog&media=photos&extras=owner_name%2C+date_upload%2C+description%2C+original_format&format=json&nojsoncallback=1&page=${
+    const api = `https://api.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&api_key=888315f85320878f33df15f17795be6e&user_id=${
+      this.props.match.params.owner
+    }&extras=owner_name%2Cdate_upload%2Cdescription%2Coriginal_format&per_page=100&format=json&nojsoncallback=1&page=${
       this.state.loadTime
     }`
 
@@ -83,6 +85,7 @@ class Dogs extends Component {
             isLoading: false,
             photos: [...this.state.photos, ...morePhotos],
             loadTime: this.state.loadTime + 1,
+            author: response.data.photos.photo[0].ownername,
           })
           localStorage.setItem('photos', JSON.stringify(this.state.photos))
         })
@@ -94,7 +97,7 @@ class Dogs extends Component {
   }
 
   render() {
-    const { error, isLoading, photos } = this.state
+    const { error, isLoading, photos, author } = this.state
     const { classes } = this.props
 
     return (
@@ -104,7 +107,7 @@ class Dogs extends Component {
         ) : (
           <div>
             <Typography variant="h3" gutterBottom className={classes.pageName}>
-              Dogs photos from Flickr
+              Dogs photos by {author}
             </Typography>
             <Grid container direction="row" justify="space-around" alignItems="center">
               {photos.map(photo => (
@@ -113,7 +116,7 @@ class Dogs extends Component {
             </Grid>
             {error && (
               <Typography variant="h4" style={{ color: 'red' }}>
-                No more dogs photos on Flickr
+                No more photos by this author
               </Typography>
             )}
             {isLoading && <CircularProgress className={classes.photosLoader} color="secondary" />}
@@ -124,4 +127,4 @@ class Dogs extends Component {
   }
 }
 
-export default withStyles(styles)(Dogs)
+export default withStyles(styles)(Author)
