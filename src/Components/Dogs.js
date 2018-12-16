@@ -38,8 +38,9 @@ class Dogs extends Component {
     this.state = {
       error: false,
       isLoading: false,
-      photos: [],
       loadTime: 1,
+      photos: [],
+      filteredPhotos: [],
     }
 
     window.onscroll = () => {
@@ -54,6 +55,8 @@ class Dogs extends Component {
         loadDogs()
       }
     }
+
+    this.search = React.createRef()
   }
 
   componentWillMount() {
@@ -82,6 +85,7 @@ class Dogs extends Component {
           this.setState({
             isLoading: false,
             photos: [...this.state.photos, ...morePhotos],
+            filteredPhotos: [...this.state.photos, ...morePhotos],
             loadTime: this.state.loadTime + 1,
           })
           localStorage.setItem('photos', JSON.stringify(this.state.photos))
@@ -93,8 +97,20 @@ class Dogs extends Component {
     })
   }
 
+  handleSearch = e => {
+    e.preventDefault()
+    const search = this.search.current.value
+    const photos = this.state.photos.filter(photo => {
+      const photoDescription = photo.description._content.toLowerCase()
+      return photoDescription.indexOf(search.toLowerCase()) !== -1
+    })
+    this.setState({
+      filteredPhotos: search ? photos : this.state.photos,
+    })
+  }
+
   render() {
-    const { error, isLoading, photos } = this.state
+    const { error, isLoading, photos, filteredPhotos } = this.state
     const { classes } = this.props
 
     return (
@@ -106,16 +122,26 @@ class Dogs extends Component {
             <Typography variant="h3" gutterBottom className={classes.pageName}>
               Dogs photos from Flickr
             </Typography>
+
+            <form onSubmit={this.handleSearch}>
+              <input style={{ width: '100%', height: '25px' }} ref={this.search} placeholder="Search photos..." />
+              <button type="submit">Search</button>
+            </form>
+
             <Grid container direction="row" justify="space-around" alignItems="center">
-              {photos.map(photo => (
-                <DogsList key={photo.id} {...photo} />
-              ))}
+              {filteredPhotos.length > 1 ? (
+                filteredPhotos.map(photo => <DogsList key={photo.id} {...photo} />)
+              ) : (
+                <h3>No photos for search '{this.search.current.value}'</h3>
+              )}
             </Grid>
+
             {error && (
               <Typography variant="h4" style={{ color: 'red' }}>
                 No more dogs photos on Flickr
               </Typography>
             )}
+
             {isLoading && <CircularProgress className={classes.photosLoader} color="secondary" />}
           </div>
         )}
