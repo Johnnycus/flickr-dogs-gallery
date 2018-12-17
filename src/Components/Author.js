@@ -40,27 +40,38 @@ class Author extends Component {
       isLoading: false,
       photos: [],
       loadTime: 1,
+      filteredPhotos: [],
     }
 
     window.onscroll = () => {
       const {
         loadDogs,
+        search,
         state: { error, isLoading },
       } = this
 
       if (error || isLoading) return
 
-      if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight - 2 && navigator.onLine) {
+      if (
+        window.innerHeight + window.pageYOffset >= document.body.offsetHeight - 2 &&
+        navigator.onLine &&
+        !search.current.value
+      ) {
         loadDogs()
       }
     }
+
+    this.search = React.createRef()
   }
 
   componentWillMount() {
     if (navigator.onLine) {
       this.loadDogs()
     } else {
-      this.setState({ photos: JSON.parse(localStorage.getItem('photos')) })
+      this.setState({
+        photos: JSON.parse(localStorage.getItem('photos')),
+        filteredPhotos: JSON.parse(localStorage.getItem('filteredPhotos')),
+      })
     }
   }
 
@@ -84,10 +95,12 @@ class Author extends Component {
           this.setState({
             isLoading: false,
             photos: [...this.state.photos, ...morePhotos],
+            filteredPhotos: [...this.state.photos, ...morePhotos],
             loadTime: this.state.loadTime + 1,
             author: response.data.photos.photo[0].ownername,
           })
           localStorage.setItem('photos', JSON.stringify(this.state.photos))
+          localStorage.setItem('filteredPhotos', JSON.stringify(this.state.filteredPhotos))
         })
         .catch(err => {
           console.log(err)
@@ -96,8 +109,20 @@ class Author extends Component {
     })
   }
 
+  handleSearch = e => {
+    e.preventDefault()
+    const search = this.search.current.value
+    const photos = this.state.photos.filter(photo => {
+      const photoDescription = photo.description._content.toLowerCase()
+      return photoDescription.indexOf(search.toLowerCase()) !== -1
+    })
+    this.setState({
+      filteredPhotos: search ? photos : this.state.photos,
+    })
+  }
+
   render() {
-    const { error, isLoading, photos, author } = this.state
+    const { error, isLoading, photos, author, filteredPhotos } = this.state
     const { classes } = this.props
 
     return (
@@ -109,11 +134,22 @@ class Author extends Component {
             <Typography variant="h3" gutterBottom className={classes.pageName}>
               Dogs photos by {author}
             </Typography>
+
+            <form onSubmit={this.handleSearch}>
+              <input style={{ width: '100%', height: '25px' }} ref={this.search} placeholder="Search photos..." />
+              <button type="submit">Search</button>
+            </form>
+
             <Grid container direction="row" justify="space-around" alignItems="center">
-              {photos.map(photo => (
-                <DogsList key={photo.id} {...photo} />
-              ))}
+              {filteredPhotos.length > 1 ? (
+                filteredPhotos.map(photo => <DogsList key={photo.id} {...photo} />)
+              ) : (
+                <h3>
+                  No photos for search '{this.search.current.value}' in {author} profile
+                </h3>
+              )}
             </Grid>
+
             {error && (
               <Typography variant="h4" style={{ color: 'red' }}>
                 No more photos by this author

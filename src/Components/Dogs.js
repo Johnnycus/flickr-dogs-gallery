@@ -46,12 +46,17 @@ class Dogs extends Component {
     window.onscroll = () => {
       const {
         loadDogs,
+        search,
         state: { error, isLoading },
       } = this
 
       if (error || isLoading) return
 
-      if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight - 2 && navigator.onLine) {
+      if (
+        window.innerHeight + window.pageYOffset >= document.body.offsetHeight - 2 &&
+        navigator.onLine &&
+        !search.current.value
+      ) {
         loadDogs()
       }
     }
@@ -63,7 +68,10 @@ class Dogs extends Component {
     if (navigator.onLine) {
       this.loadDogs()
     } else {
-      this.setState({ photos: JSON.parse(localStorage.getItem('photos')) })
+      this.setState({
+        photos: JSON.parse(localStorage.getItem('photos')),
+        filteredPhotos: JSON.parse(localStorage.getItem('filteredPhotos')),
+      })
     }
   }
 
@@ -89,6 +97,7 @@ class Dogs extends Component {
             loadTime: this.state.loadTime + 1,
           })
           localStorage.setItem('photos', JSON.stringify(this.state.photos))
+          localStorage.setItem('filteredPhotos', JSON.stringify(this.state.filteredPhotos))
         })
         .catch(err => {
           console.log(err)
